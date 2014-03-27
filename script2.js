@@ -1,5 +1,6 @@
 var socket = io.connect('https://dogechat.net:443',{secure: true});
 var username = "";
+var balance = 0;
 var currentRoom = "";
 var badge = "none";
 var smilies = ["smile", "tongue", "happy", "wink", "wow", "sad", "angry", "mad", "meh", "rolleye", "zzz", "high", "candy", "gift", "teddy", "moon", "sun"];
@@ -10,6 +11,7 @@ var myRooms = [];
 var myPMs = [];
 var color = "000";
 var badge = "none";
+var mentioned = false;
 
 $(document).ready(function(){
 	if (getCookie('session') != "") socket.emit('login', {session: getCookie('session')});
@@ -73,6 +75,33 @@ $(document).ready(function(){
 	});
 });
 
+socket.on("chat", function(data) {
+	if (data.message.substr(0, 3).toLowerCase() == "/me") data.message = '<i>' + data.message.substr(3) + '</i>';
+	if (data.message.indexOf(username) != -1) {
+		data.message = '<b>' + data.message + '</b>';
+		$("[data-room='" + data.room + "']").next('.msgCount').addClass('badge-negative').removeClass('badge-primary');
+		mentioned = true;
+		$('#beep')[0].play();
+	}
+	data.message - data.message.replace("class='label label-success'", 'class="badge badge-positive"');
+	var id = Math.floor(Math.random() * 90000) + 10000;
+	theMsg = '<li id="' + id + '" class="table-view-cell chat-line"><p style="color:#' + data.color + ';"><b>' + data.user + ':</b> ' + data.message + '<span class="badge badge-primary badge-inverted">' + data.timestamp.substr(11, 5) + '</span>' + (data.winbtc > 0 ? ('<span class="badge' + (data.user == username ? ' badge-positive' : '') + '">+' + data.winbtc + '</span>') : '') + '</p></li>'
+	roomMessages[data.room] = roomMessages[data.room] ? roomMessages[data.room] : [];
+	roomMessages[data.room].push(theMsg);
+	while (roomMessages[data.room].length > 200) {
+		roomMessages[data.room].shift();
+	}
+	if (data.room == currentRoom) {
+		$('#chattext').append(theMsg);
+		$('#chat-content').scrollTop($('#chat-content').scrollTop() + $('#' + id).outerHeight() + 1);
+	} else {
+		counter = $("[data-room='" + data.room + "']").next('.msgCount');
+		counter.show();
+		counter.html(Number(counter.html()) + 1);
+		$('#rooms-btn').css('color', (mentioned ? "#E83127" : "#E88827"))
+	}
+});
+
 socket.on("loggedin", function(data) {
 	console.log("Logged in");
 	username = data.username;
@@ -117,32 +146,26 @@ socket.on("joinroom", function(data){
 	}
 });
 
-socket.on("chat", function(data) {
-	if (data.message.substr(0, 3).toLowerCase() == "/me") data.message = '<i>' + data.message.substr(3) + '</i>';
-	if (data.message.indexOf(username) != -1) data.message = '<b>' + data.message + '</b>';
-	data.message - data.message.replace("class='label label-success'", 'class="badge badge-positive"');
-	var id = Math.floor(Math.random() * 90000) + 10000;
-	theMsg = '<li id="' + id + '" class="table-view-cell chat-line"><p style="color:#' + data.color + ';"><b>' + data.user + ':</b> ' + data.message + '<span class="badge badge-primary badge-inverted">' + data.timestamp.substr(11, 5) + '</span>' + (data.winbtc > 0 ? ('<span class="badge' + (data.user == username ? ' badge-positive' : '') + '">+' + data.winbtc + '</span>') : '') + '</p></li>'
-	roomMessages[data.room] = roomMessages[data.room] ? roomMessages[data.room] : [];
-	roomMessages[data.room].push(theMsg);
-	while (roomMessages[data.room].length > 200) {
-		roomMessages[data.room].shift();
+socket.on("balance", function(data) {
+	if (data.credits) {
+		balance = data.credits;
+	} else if (data.change) {
+		balance += data.change;
 	}
-	if (data.room == currentRoom) {
-		$('#chattext').append(theMsg);
-		$('#chat-content').scrollTop($('#chat-content').scrollTop() + $('#' + id).outerHeight() + 1);
-	}
+	$('#balance').html(balance + " doge");
 });
+
+
 
 function updateRoomList() {
 	newHTML = "";
 	for (i in myRooms) {
-		newHTML += '<li class="table-view-cell"><a onClick="changeRoom(\'' + myRooms[i] + '\')">' + myRooms[i] + '</a><button class="btn btn-negative" onClick="quitRoom(\'' + myRooms[i] + '\')">X</button></li>';
+		newHTML += '<li class="table-view-cell"><a data-room="' + myRooms[i] + '" onClick="changeRoom(this)">' + myRooms[i] + '</a><span class="badge badge-primary pull-right msgCount">0</span><button class="btn btn-negative" onClick="quitRoom(this)">X</button></li>';
 	}
 	$('#room-list').html(newHTML);
 	newHTML = "";
 	for (i in myPMs) {
-		newHTML += '<li class="table-view-cell"><a onClick="changeRoom(\'' + myPMs[i][1] + '\')">' + myPMs[i][0] + '</a><button class="btn btn-negative" onClick="quitRoom(\'' + myPMs[i][1] + '\')">X</button></li>';
+		newHTML += '<li class="table-view-cell"><a data-room="' + myPMs[i][1] + '" onClick="changeRoom(this)">' + myPMs[i][0] + '</a><span class="badge badge-primary pull-right msgCount">0</span><button class="btn btn-negative" onClick="quitRoom(this)">X</button></li>';
 	}
 	$('#pm-list').html(newHTML);
 }
@@ -159,12 +182,19 @@ function setBadge(elem) {
 	setCookie("badge", badge, 365);
 }
 
-function changeRoom(room) {
+function changeRoom(elem) {
+	room = $(elem).attr('data-room');
 	if (room != currentRoom) {
 		$('#chattext').html("");
 		$('#chattext').html(roomMessages[room] ? roomMessages[room].join("") : []);
 		$('#room-name').html('#' + room);
 		currentRoom = room;
+		$("[data-room='" + room + "']").next('.msgCount').html("0").hide();
+		$("[data-room='" + room + "']").next('.msgCount').removeClass('badge-negative').addClass('badge-primary');
+		if ($('.badge-negative').length == 0) {
+			$('#rooms-btn').css('color', '#428bca');
+			mentioned = false;
+		}
 	}
 	$('#rooms-content').hide();
 	$('#rooms-header').hide();
@@ -174,7 +204,8 @@ function changeRoom(room) {
 	$('#chat-content').scrollTop($('#chattext').outerHeight());
 }
 
-function quitRoom(room) {
+function quitRoom(elem) {
+	room = $(elem).prev().attr('data-room');
 	socket.emit("quitroom", {room: room});
 	if(room.indexOf(":") == -1) {
 		myRooms.splice(myRooms.indexOf(room), 1);

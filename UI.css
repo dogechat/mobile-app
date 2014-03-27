@@ -24,6 +24,15 @@
 	margin: 6px 0;
 }
 
+.msgCount {
+	display: none;
+	margin-right: 30px;
+}
+
+#rooms-arrow {
+	border-radius: 25px;
+}
+
 #send-btn {
 	width: 50px;
 }

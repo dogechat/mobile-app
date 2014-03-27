@@ -8,22 +8,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <link href="ratchet.min.css" rel="stylesheet" />
 <link href="UI.css" rel="stylesheet" />
-<script src="ratchet.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src="socket.io.min.js"></script>
-<script src="script2.js"></script>
 </head>
 <body>
 
 <header class="bar bar-nav" id="chat-header">
-<button class="btn btn-link btn-nav pull-left" id="rooms-btn"><span class="icon icon-left-nav"></span>Rooms</button>
+<button class="btn btn-link btn-nav pull-left" id="rooms-btn"><span class="icon icon-left-nav" id="rooms-arrow"></span>Rooms</button>
 <button class="btn btn-link btn-nav pull-right" id="style-btn">Style</button>
 <h1 class="title" id="room-name">#</h1>
 </header>
 
 <header class="bar bar-nav" id="rooms-header">
-<h1 class="title">Rooms</h1>
 <button class="btn btn-link btn-nav pull-right" id="logout-btn">Logout</button>
+<button id="balance" class="btn pull-left">0 doge</button>
+<h1 class="title">Rooms</h1>
 </header>
 
 <header class="bar bar-nav" id="login-header">
@@ -91,6 +88,12 @@
 </div>
 </ul>
 </div>
+
+<audio id="beep" src="https://dogechat.net/static/beep.wav" preload="auto"></audio>
+<script src="ratchet.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="socket.io.min.js"></script>
+<script src="script2.js"></script>
 
 </body>
 </html>
