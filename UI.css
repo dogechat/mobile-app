@@ -1,0 +1,29 @@
+#rooms-content, #chat-content, #rooms-header, #chat-header, #style-content, #style-header, .bar-footer {
+	display: none;
+}
+
+#chattext:first-child {
+	margin-top: 0;
+}
+
+.chat-line {
+	padding: 2px 15px;
+}
+
+.chat-line p {
+	color: #000;
+}
+
+#message-bar {
+	padding: 0 10px;
+	font-size: 16px;
+	border-radius: 20px;
+	box-sizing: border-box;
+	width: calc(100% - 60px);
+	height: 29px;
+	margin: 6px 0;
+}
+
+#send-btn {
+	width: 50px;
+}
