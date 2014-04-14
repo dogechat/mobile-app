@@ -8,6 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <link href="ratchet.min.css" rel="stylesheet" />
 <link href="UI.css" rel="stylesheet" />
+<script>
+  var ua = navigator.userAgent.toLowerCase();
+var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+if(isAndroid) {
+  // Do something!
+  // Redirect to Android-site?
+  window.location = 'android.html';
+}
+
+  
+</script>
 </head>
 <body>
 
@@ -72,8 +83,6 @@
 <input type="email" id="register-email" placeholder="Email">
 </form>
 <button class="btn btn-block btn-positive" id="register-btn" style="width: 96%; margin: 10px 2%;">Register</button>
-<li class="table-view-divider">Mode</li>
-<button class="btn btn-block btn-positive" href="android.html" style="width: 96%; margin: 10px 2%;" data-ignore="push" >Android Mode</button>
 </ul>
 </div>
 
