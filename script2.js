@@ -138,7 +138,7 @@ socket.on("joinroom", function(data){
 			myRooms.push(data.room);
 			myRooms.sort();
 		} else {
-			otherUser = data.room.split(":")[0] == username ? data.room.split(":")[1] : data.room.split(":")[0];
+			otherUser = data.room.split(":")[0] == username.toLowerCase() ? data.room.split(":")[1] : data.room.split(":")[0];
 			myPMs.push([otherUser, data.room]);
 			myPMs.sort();
 		}
